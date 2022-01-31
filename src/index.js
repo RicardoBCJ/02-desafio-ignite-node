@@ -16,7 +16,7 @@ function checksExistsUserAccount(request, response, next) {
   const user = users.find((user) => user.username === username);
 
   if (!user) {
-    return response.status(400).json({ error: "User does not exist" });
+    return response.status(404).json({ error: "User does not exist" });
   }
 
   request.user = user;
@@ -29,7 +29,7 @@ function checksCreateTodosUserAvailability(request, response, next) {
 
   if (!user.pro) {
     if (user.todos.length >= 10) {
-      return response.status(400).json({
+      return response.status(403).json({
         error: "You need to be a pro user to have more than 10 active tasks",
       });
     }
@@ -42,20 +42,20 @@ function checksTodoExists(request, response, next) {
 
   const user = users.find((user) => user.username === username);
 
+  if (!validate(request.params.id)) {
+    return response
+      .status(400)
+      .json({ error: "The task id is not an valid ID" });
+  }
+
   if (!user) {
-    return response.status(400).json({ error: "User does not exist" });
+    return response.status(404).json({ error: "User does not exist" });
   }
 
   const task = user.todos.find((task) => task.id === request.params.id);
 
   if (!task) {
-    return response.status(400).json({ error: "Task Does not exist" });
-  }
-
-  if (!validate(request.params.id)) {
-    return response
-      .status(400)
-      .json({ error: "The task id is not an valid ID" });
+    return response.status(404).json({ error: "Task Does not exist" });
   }
 
   request.user = user;
@@ -74,7 +74,7 @@ function findUserById(request, response, next) {
   }
 
   if (!user) {
-    return response.status(400).json({ error: "User does not exist" });
+    return response.status(404).json({ error: "User does not exist" });
   }
 
   request.user = user;
@@ -119,7 +119,7 @@ app.patch("/users/:id/pro", findUserById, (request, response) => {
 
   if (user.pro) {
     return response
-      .status(400)
+      .status(404)
       .json({ error: "Pro plan is already activated." });
   }
 
